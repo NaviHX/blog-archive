@@ -6,14 +6,20 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>Archives | Bebop号的冰箱</title>
+  <title>从零开始编写操作系统内核 0x00 | Bebop号的冰箱</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Bebop号的冰箱">
-<meta property="og:url" content="http://yoursite.com/archives/page/2/index.html">
+  <meta name="description" content="写在前面本文按照《操作系统真相还原》的顺序，记录自己编写操作系统的经历、遇到的问题以及收获的经验，做一些笔记。希望能够对同样在阅读这一本书的读者起到一些帮助。文章中的代码参考书中的代码进行编写，会同步更新到github、gitee仓库中。文章如有错漏，请读者不吝赐教，感激不胜。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从零开始编写操作系统内核 0x00">
+<meta property="og:url" content="http://yoursite.com/2021/07/21/OS0/index.html">
 <meta property="og:site_name" content="Bebop号的冰箱">
+<meta property="og:description" content="写在前面本文按照《操作系统真相还原》的顺序，记录自己编写操作系统的经历、遇到的问题以及收获的经验，做一些笔记。希望能够对同样在阅读这一本书的读者起到一些帮助。文章中的代码参考书中的代码进行编写，会同步更新到github、gitee仓库中。文章如有错漏，请读者不吝赐教，感激不胜。">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-07-21T07:21:32.799Z">
+<meta property="article:modified_time" content="2021-07-21T10:48:01.797Z">
 <meta property="article:author" content="Navi">
+<meta property="article:tag" content="计算机系统">
+<meta property="article:tag" content="项目开发">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="Bebop号的冰箱" type="application/atom+xml">
@@ -152,303 +158,173 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-OS0" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      从零开始编写操作系统内核 0x00
+    </h1>
+  
+
+        
+        <a href="/2021/07/21/OS0/" class="archive-article-date">
+  	<time datetime="2021-07-21T07:21:32.799Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-07-21</time>
+</a>
+        
+      </header>
     
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h2><p>本文按照《操作系统真相还原》的顺序，记录自己编写操作系统的经历、遇到的问题以及收获的经验，做一些笔记。希望能够对同样在阅读这一本书的读者起到一些帮助。文章中的代码参考书中的代码进行编写，会同步更新到<a target="_blank" rel="noopener" href="https://github.com/NaviHX/elephant-os">github</a>、<a target="_blank" rel="noopener" href="https://gitee.com/navihx/elephant-os">gitee</a>仓库中。文章如有错漏，请读者不吝赐教，感激不胜。</p>
+<span id="more"></span>
+
+<h2 id="正式开始-搭建开发环境"><a href="#正式开始-搭建开发环境" class="headerlink" title="正式开始: 搭建开发环境"></a>正式开始: 搭建开发环境</h2><p>调试内核选择了bochs模拟器，宿主系统为ubuntu 20.04，各位读者可以选择自己喜欢的linux发行版进行安装（如果您使用Windows系统，可以安装win版的bochs，但是操作不一定与文中的相同，或者再装一个linux虚拟机，虚拟机套虚拟机，盗梦空间了属于是）（我所用的bochs版本也和书中的不一致，某些命令的参数不相同，但是结果一致，无伤大雅）</p>
+<h3 id="从源码安装bochs"><a href="#从源码安装bochs" class="headerlink" title="从源码安装bochs"></a>从源码安装bochs</h3><p>直接从包管理器中安装的bochs无法开启调试功能，懒人大失败。必须从源码安装，打开相应的开关。</p>
+<p>去<a target="_blank" rel="noopener" href="https://bochs.sourceforge.io/">官网</a>下载bochs源码，可以得到一个压缩包<code>bochs-2.6.11.tar.gz</code>，直接对它进行一个压的解。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tar zxvf bochs-2.6.11.tar.gz</span><br></pre></td></tr></table></figure>
+
+<p>进入到解压后的文件夹，进行经典的configure，make，make install即可。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">./configure \</span><br><span class="line">--prefix=/opt/bochs \</span><br><span class="line">--enable-debugger \</span><br><span class="line">--enable-disasm \</span><br><span class="line">--enable-iodebug \</span><br><span class="line">--with-x \</span><br><span class="line">--with-x11</span><br></pre></td></tr></table></figure>
+
+<p>各项设置的含义<br>|设置|含义|<br>|-|-|<br>|–prefix|安装目录，我习惯放在<code>/opt/</code>目录中|<br>|–enable-debugger|打开调试器，如果你想使用gdb，请将此项改为–enable-gdb-stub|<br>|–enable-disasm|支持反汇编|<br>|–enable-iodebug|支持io接口调试|<br>|–with-x|使用x window，如果使用wayland请改成相应的选项|<br>|–with-x11|使用x11|</p>
+<p>configure完成后生成makefile文件，然后make，make install。</p>
+<p>然后将bochs的路径添加到PATH变量中去。打开你的shell配置文件（我的是<code>.zshrc</code>,这取决于你所使用的shell，如果是bash的话就是<code>.bashrc</code>了），添加<code>export PATH=&quot;/opt/bochs/bin&quot;:$PATH</code>。重启shell或者source一下配置文件后你就可以和bochs愉快地玩耍了。</p>
+<h3 id="配置bochs"><a href="#配置bochs" class="headerlink" title="配置bochs"></a>配置bochs</h3><p>bochs的配置文件样例是<code>/opt/bochs/share/doc/bochs/bochsrc-sample.txt</code>，可以去了解一下各个配置的含义。</p>
+<p>首先在你要运行bochs的目录下建立一个工作目录，我建立的是<code>$HOME/bochs</code>，cd进去，输入<code>vim bochsrc</code>，创建新配置文件。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">###########</span></span><br><span class="line"><span class="comment"># bochsrc #</span></span><br><span class="line"><span class="comment">###########</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用的内存，单位MB</span></span><br><span class="line">megs: 32</span><br><span class="line"></span><br><span class="line"><span class="comment"># 读取的bios rom</span></span><br><span class="line">romimage: file=/opt/bochs/share/bochs/BIOS-bochs-latest</span><br><span class="line">vgaromimage: file=/opt/bochs/share/bochs/VGABIOS-lgpl-latest</span><br><span class="line"></span><br><span class="line"><span class="comment"># 引导类型</span></span><br><span class="line">boot: disk</span><br><span class="line"></span><br><span class="line"><span class="comment"># 日志输出路径</span></span><br><span class="line"><span class="built_in">log</span>: bochs.out</span><br><span class="line"></span><br><span class="line"><span class="comment"># 外设</span></span><br><span class="line">mouse: enabled=0</span><br><span class="line">keyboard: keymap=/opt/bochs/share/bochs/keymaps/x11-pc-us.map <span class="comment"># 注意这里与书中不同，书中的配置方式已过时，无法正常启动</span></span><br><span class="line"></span><br><span class="line">ata0: enabled=1, ioaddr1=0x1f0, ioaddr2=0x3f0, irq=14</span><br></pre></td></tr></table></figure>
+
+<p>完成后，运行bochs，会提示你选择配置文件(<code>2. Read options from ...</code>)，输入2，回车，然后输入你的配置文件的路径即可。（当然这个时候是运行不起来的，因为我们什么都还没有写呢）</p>
+<h3 id="制作硬盘image"><a href="#制作硬盘image" class="headerlink" title="制作硬盘image"></a>制作硬盘image</h3><p>bochs为我们提供bximage软件帮助我们创建镜像，是不是非常贴心呢？（x</p>
+<p>bximage为我们提供了交互式的使用方式，直接输入<code>bximage</code>就能使用，再也不用背那一大串命令参数了，赞欸！（x</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">bximage</span><br><span class="line">========================================================================</span><br><span class="line">                                bximage</span><br><span class="line">  Disk Image Creation / Conversion / Resize and Commit Tool <span class="keyword">for</span> Bochs</span><br><span class="line">         <span class="variable">$Id</span>: bximage.cc 13481 2018-03-30 21:04:04Z vruppert $</span><br><span class="line">========================================================================</span><br><span class="line"></span><br><span class="line">1. Create new floppy or hard disk image</span><br><span class="line">2. Convert hard disk image to other format (mode)</span><br><span class="line">3. Resize hard disk image</span><br><span class="line">4. Commit <span class="string">&#x27;undoable&#x27;</span> redolog to base image</span><br><span class="line">5. Disk image info</span><br><span class="line"></span><br><span class="line">0. Quit</span><br><span class="line"></span><br><span class="line">Please choose one [0] </span><br></pre></td></tr></table></figure>
+
+<p>选择1，进行镜像创建</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Create image</span><br><span class="line"></span><br><span class="line">Do you want to create a floppy disk image or a hard disk image?</span><br><span class="line">Please <span class="built_in">type</span> hd or fd. [hd]</span><br></pre></td></tr></table></figure>
+
+<p>选择hd，创建硬盘镜像</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">What kind of image should I create?</span><br><span class="line">Please <span class="built_in">type</span> flat, sparse, growing, vpc or vmware4. [flat]</span><br></pre></td></tr></table></figure>
+
+<p>选择flat</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Choose the size of hard disk sectors.</span><br><span class="line">Please <span class="built_in">type</span> 512, 1024 or 4096. [512]</span><br></pre></td></tr></table></figure>
+
+<p>选择扇区大小，512B</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Enter the hard disk size <span class="keyword">in</span> megabytes, between 10 and 8257535</span><br><span class="line">[10] </span><br></pre></td></tr></table></figure>
+
+<p>选择硬盘大小，单位MB，60MB</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">What should be the name of the image?</span><br><span class="line">[c.img]</span><br></pre></td></tr></table></figure>
+
+<p>最后就是选择输出的名字，按照你的习惯起就好，为了不和其他文件搞混，我选择hd60M.img</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Creating hard disk image <span class="string">&#x27;hd60.img&#x27;</span> with CHS=121/16/63 (sector size = 512)</span><br><span class="line"></span><br><span class="line">The following line should appear <span class="keyword">in</span> your bochsrc:</span><br><span class="line">  ata0-master: <span class="built_in">type</span>=disk, path=<span class="string">&quot;hd60M.img&quot;</span>, mode=flat</span><br></pre></td></tr></table></figure>
+
+<p>根据bximage的输出，将<code>ata0-master: type=disk, path=&quot;hd60M.img&quot;, mode=flat</code>添加到配置文件的最后一行，指定从这里开始引导。</p>
+<p>完成这些后，你是否已经跃跃欲试，想要运行一下bochs了呢？那么试试吧。运行bochs，因为此前已经读入了配置文件，这次的默认选项更改为了6.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">========================================================================</span><br><span class="line">                       Bochs x86 Emulator 2.6.11</span><br><span class="line">              Built from SVN snapshot on January 5, 2020</span><br><span class="line">                Timestamp: Sun Jan  5 08:36:00 CET 2020</span><br><span class="line">========================================================================</span><br><span class="line">00000000000i[      ] BXSHARE not <span class="built_in">set</span>. using compile time default <span class="string">&#x27;/opt/bochs/share/bochs&#x27;</span></span><br><span class="line">00000000000i[      ] reading configuration from bochsrc</span><br><span class="line">00000000000e[      ] bochsrc:14: ataX-master/slave CHS <span class="built_in">set</span> to 0/0/0 - autodetection enabled</span><br><span class="line">------------------------------</span><br><span class="line">Bochs Configuration: Main Menu</span><br><span class="line">------------------------------</span><br><span class="line"></span><br><span class="line">This is the Bochs Configuration Interface, <span class="built_in">where</span> you can describe the</span><br><span class="line">machine that you want to simulate.  Bochs has already searched <span class="keyword">for</span> a</span><br><span class="line">configuration file (typically called bochsrc.txt) and loaded it <span class="keyword">if</span> it</span><br><span class="line">could be found.  When you are satisfied with the configuration, go</span><br><span class="line">ahead and start the simulation.</span><br><span class="line"></span><br><span class="line">You can also start bochs with the -q option to skip these menus.</span><br><span class="line"></span><br><span class="line">1. Restore factory default configuration</span><br><span class="line">2. Read options from...</span><br><span class="line">3. Edit options</span><br><span class="line">4. Save options to...</span><br><span class="line">5. Restore the Bochs state from...</span><br><span class="line">6. Begin simulation</span><br><span class="line">7. Quit now</span><br><span class="line"></span><br><span class="line">Please choose one: [6]</span><br></pre></td></tr></table></figure>
+
+<p>直接回车，开始运行。不幸的是，弹出一个窗口后，什么都没有发生（或者像书中的那样，提示没有可引导的设备，no bootable device）。不要灰心，现在才要进入正题。</p>
+<h3 id="什么是MBR"><a href="#什么是MBR" class="headerlink" title="什么是MBR"></a>什么是MBR</h3><p>我们的计算机在上电后，立马就会运行的是BIOS–基础输入输出系统。它就是一个主板上的小程序，主要负责检测、初始化硬件，建立中断向量表，实现相应硬件的操作，最后一项工作就是校验0盘0道1扇区的内容。这个扇区中（可能会）储存MBR程序，BIOS需要校验最后的魔数0x55,0xaa。如果校验成功，就会将这段程序加载到0x7c00地址，跳转到此处，将控制权交给MBR程序。</p>
+<p>MBR（主引导程序）是第一个可以由我们控制的程序，这个程序是独立于操作系统，直接在裸机上运行的。其中包括了</p>
+<ol>
+<li>446字节的引导程序</li>
+<li>64字节的分区表，每个表项占16个字节，意味着最多有4个分区，安装有操作系统的分区会被设置为活动分区（表项的第一个字节被设置为0x80），它们的起始扇区存储了OS引导程序OBR，前三个字节为跳转指令，当MBR找到活动分区后，就跳转到OBR，交出控制权。（就像接力赛一样，每一个程序将控制权）</li>
+<li>2字节的魔数0x55 0xaa</li>
+</ol>
+<h3 id="上手试试"><a href="#上手试试" class="headerlink" title="上手试试"></a>上手试试</h3><p>看了那么多介绍，是否想试一试自己编写一段代码呢？这里提供了一个执行<a target="_blank" rel="noopener" href="https://github.com/NaviHX/elephant-os/tree/master/chapter0">简单输出操作的MBR程序</a>供大家尝试。将你的硬盘镜像文件拷贝到chapter0目录中，make一下就能将MBR程序写入到硬盘中了，然后替换原bochs文件夹中的镜像就可以运行了，是不是很方便呢？</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">section MBR vstart=0x7c00</span><br><span class="line">    ; 初始化段寄存器</span><br><span class="line">    mov ax, cs</span><br><span class="line">    mov ds, ax</span><br><span class="line">    mov es, ax</span><br><span class="line">    mov fs, ax</span><br><span class="line">    mov sp, 0x7c00</span><br><span class="line"></span><br><span class="line">    ; 上卷屏幕</span><br><span class="line">    mov ax, 0x600  ; ah: 中断功能号 al: 上卷行数, 0表示全部</span><br><span class="line">    mov bx, 0x700  ; bh: 上卷行属性</span><br><span class="line">    mov cx, 0x0    ; (cl, ch): 左上角坐标</span><br><span class="line">    mov dx, 0x184f ; (dl, dh): 右下角坐标</span><br><span class="line">    int 0x10</span><br><span class="line"></span><br><span class="line">    ; 获取光标位置</span><br><span class="line">    mov ah, 3 ; 中断功能号 </span><br><span class="line">    mov bh, 0 ; 页号</span><br><span class="line">    int 0x10</span><br><span class="line"></span><br><span class="line">    ; 输出</span><br><span class="line">    mov ax, message</span><br><span class="line">    mov bp, ax      ; es:bp为字符串首地址，es已被置为0x7c00, 只需将偏移量送入bp</span><br><span class="line">    mov cx, 0x0b    ; 输出字符串长度</span><br><span class="line">    mov ax, 0x1301  ; 13号中断功能: 输出字符串 01: 输出属性，光标跟随输出移动</span><br><span class="line">    mov bx, 0x2     ; bh: 页号 bl: 输出字体: 0x02(黑底绿字)</span><br><span class="line">    int 0x10</span><br><span class="line"></span><br><span class="line">    jmp $ ; 死循环，在此悬停</span><br><span class="line"></span><br><span class="line">    message db &quot;MBR RUNNING&quot; ; 待输出的字符串</span><br><span class="line">    times 510-($-$$) db 0    ; 以0x00填充整个扇区剩余的部分</span><br><span class="line">    db 0x55, 0xaa            ; 魔数, 表示这个扇区存储MBR主引导记录</span><br></pre></td></tr></table></figure>
+
+<h3 id="一些分析"><a href="#一些分析" class="headerlink" title="一些分析"></a>一些分析</h3><h4 id="vstart-0x7c00"><a href="#vstart-0x7c00" class="headerlink" title="vstart=0x7c00"></a>vstart=0x7c00</h4><p>就如同上文所讲的那样，mbr程序会被加载到内存0x7c00的位置。这意味着，文件中各条指令和数据的地址都是从0x7c00开始的。这一条指令指定了汇编器编译这个section时的起始地址，后面的所有地址都从0x7c00开始计算。</p>
+<h4 id="初始化寄存器"><a href="#初始化寄存器" class="headerlink" title="初始化寄存器"></a>初始化寄存器</h4><p>BIOS通过<code>jmp 0: 7c00</code>跳转到MBR程序，cs寄存器已经被置为0，我们只需要用cs寄存器里面的值初始化其他段寄存器即可。需要注意的是，硬件中没有直接将cs值传递给其他段寄存器的指令，所有这里使用了ax寄存器作为中介。</p>
+<p>各段寄存器的功能<br>|寄存器名称|功能|<br>|-|-|<br>|CS|代码段寄存器，代码段基址|<br>|DS|数据段寄存器，数据段基址|<br>|ES|附加段寄存器|<br>|FS|附加段寄存器|<br>|GS|附加段寄存器|<br>|SS|堆栈段寄存器，堆栈段基址|</p>
+<p>在实模式中，内存单元的地址表示为<code>段基址: 偏移量</code>，在保护模式中，段寄存器中的值作为段选择子，在GDT全局描述符表中查找地址和属性。</p>
+<h4 id="int-0x10"><a href="#int-0x10" class="headerlink" title="int 0x10"></a>int 0x10</h4><p>0x10中断负责打印，是一个非常强大的中断。按照要求向ah中写入功能号，在其他寄存器中写入参数，就可以实现相应的功能。参考注释了解一下就行了。</p>
+<h4 id="神奇的-和"><a href="#神奇的-和" class="headerlink" title="神奇的 $ 和 $$"></a>神奇的 $ 和 $$</h4><p>这两个指令是nasm提供的。$指汇编器为该行分配的地址，$$指汇编器为本section分配的地址，两者相减可以得到section开始到这一行前的内存大小。因为MBR程序的大小必须为512B，减去最后的两个魔数仍然有510B，所以我们需要在空闲的地方填充0，使用times指令将0重复相应次数。</p>
+<h3 id="运行一下？"><a href="#运行一下？" class="headerlink" title="运行一下？"></a>运行一下？</h3><p>如果成功运行，你的bochs窗口中出现黑底绿色的<code>MBR RUNNING</code>。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
       
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2021" class="archive-year">2021</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/07/21/p2001/" class="archive-article-date">
-  	<time datetime="2021-07-21T06:33:50.659Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-07-21</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/07/21/p2001/">P2001 硬币的面值</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Code</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">计算机系统</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">贪心我TM贪爆</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">项目开发</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/07/21/p2697/" class="archive-article-date">
-  	<time datetime="2021-07-21T06:33:50.659Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-07-21</time>
-</a>
+<nav id="article-nav">
+  
+  
+    <a href="/2021/07/21/NES1/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">NeSimulator Step&lt;0x01&gt; 高速公路</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/07/21/p2697/">P2697 宝石串</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Code</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">暴力</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%99%E5%9C%A8%E5%89%8D%E9%9D%A2"><span class="toc-number">1.</span> <span class="toc-text">写在前面</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AD%A3%E5%BC%8F%E5%BC%80%E5%A7%8B-%E6%90%AD%E5%BB%BA%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83"><span class="toc-number">2.</span> <span class="toc-text">正式开始: 搭建开发环境</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%8E%E6%BA%90%E7%A0%81%E5%AE%89%E8%A3%85bochs"><span class="toc-number">2.1.</span> <span class="toc-text">从源码安装bochs</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%85%8D%E7%BD%AEbochs"><span class="toc-number">2.2.</span> <span class="toc-text">配置bochs</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%B6%E4%BD%9C%E7%A1%AC%E7%9B%98image"><span class="toc-number">2.3.</span> <span class="toc-text">制作硬盘image</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFMBR"><span class="toc-number">2.4.</span> <span class="toc-text">什么是MBR</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8A%E6%89%8B%E8%AF%95%E8%AF%95"><span class="toc-number">2.5.</span> <span class="toc-text">上手试试</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E4%BA%9B%E5%88%86%E6%9E%90"><span class="toc-number">2.6.</span> <span class="toc-text">一些分析</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#vstart-0x7c00"><span class="toc-number">2.6.1.</span> <span class="toc-text">vstart&#x3D;0x7c00</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E5%AF%84%E5%AD%98%E5%99%A8"><span class="toc-number">2.6.2.</span> <span class="toc-text">初始化寄存器</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#int-0x10"><span class="toc-number">2.6.3.</span> <span class="toc-text">int 0x10</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%A5%9E%E5%A5%87%E7%9A%84-%E5%92%8C"><span class="toc-number">2.6.4.</span> <span class="toc-text">神奇的 $ 和 $$</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%90%E8%A1%8C%E4%B8%80%E4%B8%8B%EF%BC%9F"><span class="toc-number">2.7.</span> <span class="toc-text">运行一下？</span></a></li></ol></li></ol>
+                    </div>
+                </span>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
+        
+    </div>
+</aside>
+
+
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/07/21/pdf%E6%96%87%E4%BB%B6%E4%BF%A1%E6%81%AF%E7%AD%9B%E9%80%89/" class="archive-article-date">
-  	<time datetime="2021-07-21T06:33:50.659Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-07-21</time>
-</a>
-        </div>
-    	 
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/07/21/pdf%E6%96%87%E4%BB%B6%E4%BF%A1%E6%81%AF%E7%AD%9B%E9%80%89/">pdf信息的提取</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">瞎搞</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/07/21/stackoverflow/" class="archive-article-date">
-  	<time datetime="2021-07-21T06:33:50.659Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-07-21</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/07/21/stackoverflow/">Stack-Overflow 栈溢出攻击</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">CSAPP</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/07/21/NES4/" class="archive-article-date">
-  	<time datetime="2021-07-21T06:33:50.655Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-07-21</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/07/21/NES4/">NeSimulator Step&lt;0x04&gt; 图形处理器</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">开发</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/07/21/P1280/" class="archive-article-date">
-  	<time datetime="2021-07-21T06:33:50.655Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-07-21</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/07/21/P1280/">P1280 尼克的任务</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Code</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">动态规划</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/07/21/how-to-host-a-blog/" class="archive-article-date">
-  	<time datetime="2021-07-21T06:33:50.655Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-07-21</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/07/21/how-to-host-a-blog/">使用Hexo与Nginx搭建属于自己的博客</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">开发</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
-
-    
-    <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/archives/">&amp;laquo; Prev</a><a class="page-number" href="/archives/">1</a><span class="page-number current">2</span>
-    </nav>
   
 
 
@@ -472,8 +348,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
