@@ -16,7 +16,7 @@
 <meta property="og:description" content="写在前面本文按照《操作系统真相还原》的顺序，记录自己编写操作系统的经历、遇到的问题以及收获的经验，做一些笔记。希望能够对同样在阅读这一本书的读者起到一些帮助。文章中的代码参考书中的代码进行编写，会同步更新到github、gitee仓库中。文章如有错漏，请读者不吝赐教，感激不胜。">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2021-07-21T07:21:32.799Z">
-<meta property="article:modified_time" content="2021-07-21T10:48:01.797Z">
+<meta property="article:modified_time" content="2021-07-21T10:57:12.178Z">
 <meta property="article:author" content="Navi">
 <meta property="article:tag" content="计算机系统">
 <meta property="article:tag" content="项目开发">
@@ -189,7 +189,39 @@
 <p>进入到解压后的文件夹，进行经典的configure，make，make install即可。</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">./configure \</span><br><span class="line">--prefix=/opt/bochs \</span><br><span class="line">--enable-debugger \</span><br><span class="line">--enable-disasm \</span><br><span class="line">--enable-iodebug \</span><br><span class="line">--with-x \</span><br><span class="line">--with-x11</span><br></pre></td></tr></table></figure>
 
-<p>各项设置的含义<br>|设置|含义|<br>|-|-|<br>|–prefix|安装目录，我习惯放在<code>/opt/</code>目录中|<br>|–enable-debugger|打开调试器，如果你想使用gdb，请将此项改为–enable-gdb-stub|<br>|–enable-disasm|支持反汇编|<br>|–enable-iodebug|支持io接口调试|<br>|–with-x|使用x window，如果使用wayland请改成相应的选项|<br>|–with-x11|使用x11|</p>
+<p>各项设置的含义</p>
+<table>
+<thead>
+<tr>
+<th>设置</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>–prefix</td>
+<td>安装目录，我习惯放在<code>/opt/</code>目录中</td>
+</tr>
+<tr>
+<td>–enable-debugger</td>
+<td>打开调试器，如果你想使用gdb，请将此项改为–enable-gdb-stub</td>
+</tr>
+<tr>
+<td>–enable-disasm</td>
+<td>支持反汇编</td>
+</tr>
+<tr>
+<td>–enable-iodebug</td>
+<td>支持io接口调试</td>
+</tr>
+<tr>
+<td>–with-x</td>
+<td>使用x window，如果使用wayland请改成相应的选项</td>
+</tr>
+<tr>
+<td>–with-x11</td>
+<td>使用x11</td>
+</tr>
+</tbody></table>
 <p>configure完成后生成makefile文件，然后make，make install。</p>
 <p>然后将bochs的路径添加到PATH变量中去。打开你的shell配置文件（我的是<code>.zshrc</code>,这取决于你所使用的shell，如果是bash的话就是<code>.bashrc</code>了），添加<code>export PATH=&quot;/opt/bochs/bin&quot;:$PATH</code>。重启shell或者source一下配置文件后你就可以和bochs愉快地玩耍了。</p>
 <h3 id="配置bochs"><a href="#配置bochs" class="headerlink" title="配置bochs"></a>配置bochs</h3><p>bochs的配置文件样例是<code>/opt/bochs/share/doc/bochs/bochsrc-sample.txt</code>，可以去了解一下各个配置的含义。</p>
@@ -236,7 +268,39 @@
 
 <h3 id="一些分析"><a href="#一些分析" class="headerlink" title="一些分析"></a>一些分析</h3><h4 id="vstart-0x7c00"><a href="#vstart-0x7c00" class="headerlink" title="vstart=0x7c00"></a>vstart=0x7c00</h4><p>就如同上文所讲的那样，mbr程序会被加载到内存0x7c00的位置。这意味着，文件中各条指令和数据的地址都是从0x7c00开始的。这一条指令指定了汇编器编译这个section时的起始地址，后面的所有地址都从0x7c00开始计算。</p>
 <h4 id="初始化寄存器"><a href="#初始化寄存器" class="headerlink" title="初始化寄存器"></a>初始化寄存器</h4><p>BIOS通过<code>jmp 0: 7c00</code>跳转到MBR程序，cs寄存器已经被置为0，我们只需要用cs寄存器里面的值初始化其他段寄存器即可。需要注意的是，硬件中没有直接将cs值传递给其他段寄存器的指令，所有这里使用了ax寄存器作为中介。</p>
-<p>各段寄存器的功能<br>|寄存器名称|功能|<br>|-|-|<br>|CS|代码段寄存器，代码段基址|<br>|DS|数据段寄存器，数据段基址|<br>|ES|附加段寄存器|<br>|FS|附加段寄存器|<br>|GS|附加段寄存器|<br>|SS|堆栈段寄存器，堆栈段基址|</p>
+<p>各段寄存器的功能</p>
+<table>
+<thead>
+<tr>
+<th>寄存器名称</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CS</td>
+<td>代码段寄存器，代码段基址</td>
+</tr>
+<tr>
+<td>DS</td>
+<td>数据段寄存器，数据段基址</td>
+</tr>
+<tr>
+<td>ES</td>
+<td>附加段寄存器</td>
+</tr>
+<tr>
+<td>FS</td>
+<td>附加段寄存器</td>
+</tr>
+<tr>
+<td>GS</td>
+<td>附加段寄存器</td>
+</tr>
+<tr>
+<td>SS</td>
+<td>堆栈段寄存器，堆栈段基址</td>
+</tr>
+</tbody></table>
 <p>在实模式中，内存单元的地址表示为<code>段基址: 偏移量</code>，在保护模式中，段寄存器中的值作为段选择子，在GDT全局描述符表中查找地址和属性。</p>
 <h4 id="int-0x10"><a href="#int-0x10" class="headerlink" title="int 0x10"></a>int 0x10</h4><p>0x10中断负责打印，是一个非常强大的中断。按照要求向ah中写入功能号，在其他寄存器中写入参数，就可以实现相应的功能。参考注释了解一下就行了。</p>
 <h4 id="神奇的-和"><a href="#神奇的-和" class="headerlink" title="神奇的 $ 和 $$"></a>神奇的 $ 和 $$</h4><p>这两个指令是nasm提供的。$指汇编器为该行分配的地址，$$指汇编器为本section分配的地址，两者相减可以得到section开始到这一行前的内存大小。因为MBR程序的大小必须为512B，减去最后的两个魔数仍然有510B，所以我们需要在空闲的地方填充0，使用times指令将0重复相应次数。</p>
