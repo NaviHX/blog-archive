@@ -6,20 +6,20 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>P2697 宝石串 | Bebop号的冰箱</title>
+  <title>从零开始编写操作系统内核 &lt;0x01&gt; 操作显卡、硬盘与加载Loader | Bebop号的冰箱</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="题目描述有一种宝石串，由绿宝石和红宝石串成，仅当绿宝石和红宝石数目相同的时候，宝石串才最为稳定，不易断裂。安安想知道从给定的宝石串中，可以截取一段最长的稳定的宝石串，有多少颗宝石组成。请你帮助他。绿宝石用’G’表示，红宝石用’R’表示。">
+  <meta name="description" content="本节将会学习如何操作显卡与硬盘来加载loader程序。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="P2697 宝石串">
-<meta property="og:url" content="http://yoursite.com/2021/07/21/p2697/index.html">
+<meta property="og:title" content="从零开始编写操作系统内核 &lt;0x01&gt; 操作显卡、硬盘与加载Loader">
+<meta property="og:url" content="http://yoursite.com/2021/07/24/OS1/index.html">
 <meta property="og:site_name" content="Bebop号的冰箱">
-<meta property="og:description" content="题目描述有一种宝石串，由绿宝石和红宝石串成，仅当绿宝石和红宝石数目相同的时候，宝石串才最为稳定，不易断裂。安安想知道从给定的宝石串中，可以截取一段最长的稳定的宝石串，有多少颗宝石组成。请你帮助他。绿宝石用’G’表示，红宝石用’R’表示。">
+<meta property="og:description" content="本节将会学习如何操作显卡与硬盘来加载loader程序。">
 <meta property="og:locale" content="en_US">
-<meta property="article:published_time" content="2021-07-21T06:33:50.659Z">
-<meta property="article:modified_time" content="2020-04-07T12:31:21.000Z">
+<meta property="article:published_time" content="2021-07-24T01:32:01.768Z">
+<meta property="article:modified_time" content="2021-07-24T03:50:47.787Z">
 <meta property="article:author" content="Navi">
-<meta property="article:tag" content="Code">
-<meta property="article:tag" content="暴力">
+<meta property="article:tag" content="项目开发">
+<meta property="article:tag" content="操作系统">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="Bebop号的冰箱" type="application/atom+xml">
@@ -158,39 +158,243 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-p2697" class="article article-type-post " itemscope itemprop="blogPost">
+            <article id="post-OS1" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      P2697 宝石串
+      从零开始编写操作系统内核 &lt;0x01&gt; 操作显卡、硬盘与加载Loader
     </h1>
   
 
         
-        <a href="/2021/07/21/p2697/" class="archive-article-date">
-  	<time datetime="2021-07-21T06:33:50.659Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-07-21</time>
+        <a href="/2021/07/24/OS1/" class="archive-article-date">
+  	<time datetime="2021-07-24T01:32:01.768Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-07-24</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h2><p>有一种宝石串，由绿宝石和红宝石串成，仅当绿宝石和红宝石数目相同的时候，宝石串才最为稳定，不易断裂。安安想知道从给定的宝石串中，可以截取一段最长的稳定的宝石串，有多少颗宝石组成。请你帮助他。<br>绿宝石用’G’表示，红宝石用’R’表示。</p>
+        <p>本节将会学习如何操作显卡与硬盘来加载loader程序。</p>
 <span id="more"></span>
-<h2 id="输入"><a href="#输入" class="headerlink" title="输入"></a>输入</h2><p>一行由G和R组成的字符串</p>
-<blockquote>
-<p>sample input:<br>RGRGRRRRRRRGGGGGGGGGRGRGRGRGRGRGRGGGGGG</p>
-</blockquote>
-<h2 id="输出"><a href="#输出" class="headerlink" title="输出"></a>输出</h2><p>最长的稳定的宝石串有多少颗宝石组成</p>
-<blockquote>
-<p>sample output:<br>18</p>
-</blockquote>
-<h2 id="Hint"><a href="#Hint" class="headerlink" title="Hint"></a>Hint</h2><p>答案为:RGRGRRRRRRRGGGGGGG<br>宝石数&lt;=1000000</p>
-<h2 id="思路解析"><a href="#思路解析" class="headerlink" title="思路解析"></a>思路解析</h2><p>不妨把R视为+1，G视为-1求前缀和<br>前缀和相同的两个点之间的最大长度即为答案<br>注意记录某一个前缀和最先出现的位置</p>
-<h2 id="Solution"><a href="#Solution" class="headerlink" title="Solution"></a>Solution</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cstdio&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> MAX(a, b) a &gt; b ? a : b</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> MAGIC 1000023</span></span><br><span class="line"><span class="keyword">int</span> sum[<span class="number">1000001</span>],first[<span class="number">2000050</span>],ans,len,i;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">char</span> temp[<span class="number">1000001</span>];</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">&quot;%s&quot;</span>, temp);</span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; <span class="number">2000050</span>; i++) first[i] = <span class="number">-2</span>;</span><br><span class="line">    len = <span class="built_in">strlen</span>(temp);</span><br><span class="line">    first[MAGIC] = <span class="number">-1</span>;</span><br><span class="line">    <span class="keyword">if</span> (temp[<span class="number">0</span>] == <span class="string">&#x27;R&#x27;</span>) sum[<span class="number">0</span>] = MAGIC + <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">else</span> sum[<span class="number">0</span>] = MAGIC - <span class="number">1</span>;</span><br><span class="line">    first[sum[<span class="number">0</span>]] = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">1</span>; i &lt;= len; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> (temp[i] == <span class="string">&#x27;R&#x27;</span>) sum[i] = sum[i - <span class="number">1</span>] + <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">else</span> sum[i] = sum[i - <span class="number">1</span>] - <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span> (first[sum[i]] == <span class="number">-2</span>) first[sum[i]] = i;</span><br><span class="line">        ans = <span class="built_in">MAX</span>(ans, i - first[sum[i]]);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, ans);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="操作显卡"><a href="#操作显卡" class="headerlink" title="操作显卡"></a>操作显卡</h2><p>在之前的程序中，我们使用了BIOS的0x10中断实现打印字符串的功能。这依赖于实模式中的中断向量表，在保护模式中是没有中断向量表的，是没有办法使用0x10中断的。那有没有其他办法打印字符呢？不必担心，既然BIOS的中断例程能够通过操作显卡做到向屏幕打印的功能，只是经过了一层封装，那么我们也可以通过直接操作显卡的方式进行打印。这里就涉及到了CPU与外设通信的方式–IO接口了。</p>
+<h3 id="IO接口"><a href="#IO接口" class="headerlink" title="IO接口"></a>IO接口</h3><p>IO接口是CPU与外设进行通信的逻辑控制部件，解决了低速外部设备与CPU速度不匹配等问题，为CPU提供了统一的操作外部设备的接口。</p>
+<p>IO接口提供的功能：</p>
+<ol>
+<li>提供数据缓冲区，解决速度匹配的问题。</li>
+<li>设置信号电平转换电路。CPU内部使用TTL电平，而外设大多是机电设备。</li>
+<li>设置数据格式转换。包括模电转换，串并行转换等等。</li>
+<li>提供时序。</li>
+<li>提供地址译码。</li>
+</ol>
+<p>不同的IO接口挂接在总线上，通过内存映射的方式，把自己的端口寄存器或者内存映射到CPU内存地址中去。我们可以使用<code>in</code> \ <code>out</code> 指令来操作。</p>
+<h3 id="直接和显卡说说话"><a href="#直接和显卡说说话" class="headerlink" title="直接和显卡说说话"></a>直接和显卡说说话</h3><p>显卡直接将自己的显存映射到了地址空间中，所以我们直接使用mov就可以操作了。</p>
+<p>显存地址空间</p>
+<table>
+<thead>
+<tr>
+<th>起始地址</th>
+<th>结束地址</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0xc0000</td>
+<td>0xc7fff</td>
+<td>显示适配器BIOS</td>
+</tr>
+<tr>
+<td>0xb8000</td>
+<td>0xbffff</td>
+<td>文本模式显示适配器</td>
+</tr>
+<tr>
+<td>0xb0000</td>
+<td>0xb7fff</td>
+<td>黑白适配器</td>
+</tr>
+<tr>
+<td>0xa0000</td>
+<td>0xaffff</td>
+<td>彩色适配器</td>
+</tr>
+</tbody></table>
+<p>我们将要用到的就是0xb8000~0xbffff的地址。当我们向这些地址写入数据时，显卡就会帮我们将数据搬运到屏幕上显示出来。只要我们遵守显卡的规则，显卡就能打印出正确的内容。从地址空间可以看出，文本模式下，显存有32KB大小，显卡是如何使用这些内存的呢？显卡在加电后，默认工作在80*25的模式下，即一屏能够显示2000个字符。在这个模式下，也是能够打印出彩色字符的。标准ASCII编码中，一个字符需要7位的空间，如果我们使用一个字节来表示字符，那么就只剩下1位来表示颜色，这是远远不够的。所以我们使用了另外一个字节来表示颜色，一个字符的格式如下图所示。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">+-----+--------------+</span><br><span class="line">| 15  | 控制是否闪烁   |</span><br><span class="line">+-----+--------------+</span><br><span class="line">| 14  | R            |</span><br><span class="line">+-----+--------------+</span><br><span class="line">| 13  | G            |</span><br><span class="line">+-----+--------------+</span><br><span class="line">| 12  | B            |</span><br><span class="line">+-----+--------------+</span><br><span class="line">| 11  | 亮度位        |</span><br><span class="line">+-----+--------------+</span><br><span class="line">| 10  | R            |</span><br><span class="line">+-----+--------------+</span><br><span class="line">| 9   | G            |</span><br><span class="line">+-----+--------------+</span><br><span class="line">| 8   | B            |</span><br><span class="line">+-----+--------------+</span><br><span class="line">| 0-7 | ASCII        |</span><br><span class="line">+-----+--------------+</span><br></pre></td></tr></table></figure>
+
+<p>其中，最高4位用于表示背景的颜色，8-11位用于表示前景的颜色。我们把MBR改造一下，直接写显存来打印输出。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">section MBR vstart=0x7c00</span><br><span class="line">    ; 初始化段寄存器</span><br><span class="line">    mov ax, cs</span><br><span class="line">    mov ds, ax</span><br><span class="line">    mov es, ax</span><br><span class="line">    mov fs, ax</span><br><span class="line">    mov sp, 0x7c00</span><br><span class="line">    mov ax, 0xb800 ; 使用文本模式的显存，将gs作为显存的段寄存器</span><br><span class="line">    mov gs, ax</span><br><span class="line"></span><br><span class="line">    ; 上卷屏幕</span><br><span class="line">    mov ax, 0x600  ; ah: 中断功能号 al: 上卷行数, 0表示全部</span><br><span class="line">    mov bx, 0x700  ; bh: 上卷行属性</span><br><span class="line">    mov cx, 0x0    ; (cl, ch): 左上角坐标</span><br><span class="line">    mov dx, 0x184f ; (dl, dh): 右下角坐标</span><br><span class="line">    int 0x10</span><br><span class="line"></span><br><span class="line">    ; 获取光标位置</span><br><span class="line">    mov ah, 3 ; 中断功能号 </span><br><span class="line">    mov bh, 0 ; 页号</span><br><span class="line">    int 0x10</span><br><span class="line"></span><br><span class="line">    ; 输出&quot;MBR&quot;</span><br><span class="line">    mov byte [gs: 0x00], &#x27;M&#x27;</span><br><span class="line">    mov byte [gs: 0x01], 0xA4</span><br><span class="line"></span><br><span class="line">    mov byte [gs: 0x02], &#x27;B&#x27;</span><br><span class="line">    mov byte [gs: 0x03], 0xA4</span><br><span class="line"></span><br><span class="line">    mov byte [gs: 0x04], &#x27;R&#x27;</span><br><span class="line">    mov byte [gs: 0x05], 0xA4</span><br><span class="line"></span><br><span class="line">    jmp $ ; 死循环</span><br><span class="line"></span><br><span class="line">    times 510-($-$$) db 0    ; 以0x00填充整个扇区剩余的部分</span><br><span class="line">    db 0x55, 0xaa            ; 魔数, 表示这个扇区存储MBR主引导记录</span><br></pre></td></tr></table></figure>
+
+<p>将代码汇编后写入到硬盘映像后，启动bochs可以看到打印出了不断闪烁的绿底红字的MBR。挺简单的对吧。</p>
+<h2 id="操作硬盘"><a href="#操作硬盘" class="headerlink" title="操作硬盘"></a>操作硬盘</h2><p>除了在屏幕上输出一些必要的信息，找到并将硬盘中的内核加载程序加载到内存中也是MBR最重要的工作之一。仔细一看，之前写的MBR程序压根儿就没有这一部分的内容，不过不用担心，我们马上就来看看，如何把加载程序写到内存中去。</p>
+<p>我们的内核加载程序一开始是写在硬盘中的，我们需要把它从硬盘中取到内存中来。之前BIOS加载MBR程序也执行了类似操作，所以，这次轮到我们自己来操作硬盘了。同样的，硬盘也是通过IO接口挂在总线上的，我们只要访问IO接口就能操作硬盘了。与显卡不同的是，我们不能通过直接操作内存的方式，而是通过操作端口寄存器的方式使用硬盘。硬盘通过ata接口使用，我们可以在bochs的配置文件中看到：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ata0: enabled=1, ioaddr1=0x1f0, ioaddr2=0x3f0, irq=14</span><br><span class="line">ata0-master: type=disk, path=hd60M.img, mode=flat, cylinders=121, heads=16, spt=63</span><br></pre></td></tr></table></figure>
+
+<p>一个ata接口上可以挂两块硬盘，一块称为主盘（master），另一块称为从盘（slave），可以看到我们的硬盘镜像是主盘。那我们的端口寄存器放在哪些地址呢？答案还在配置文件中，<code>ioaddr1=0x1f0, ioaddr2=0x3f0</code>就是那些寄存器的地址。关于我们需要使用到的端口寄存器及其用法，可以参见下表。</p>
+<table>
+<thead>
+<tr>
+<th>Primary通道</th>
+<th>Secondary通道</th>
+<th>读操作时</th>
+<th>写操作时</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0x1f0</td>
+<td>0x170</td>
+<td>data</td>
+<td>data</td>
+</tr>
+<tr>
+<td>0x1f1</td>
+<td>0x171</td>
+<td>error</td>
+<td>features</td>
+</tr>
+<tr>
+<td>0x1f2</td>
+<td>0x172</td>
+<td>sector count</td>
+<td>sector count</td>
+</tr>
+<tr>
+<td>0x1f3</td>
+<td>0x173</td>
+<td>LBA low</td>
+<td>LBA low</td>
+</tr>
+<tr>
+<td>0x1f4</td>
+<td>0x174</td>
+<td>LBA mid</td>
+<td>LBA mid</td>
+</tr>
+<tr>
+<td>0x1f5</td>
+<td>0x175</td>
+<td>LBA high</td>
+<td>LBA high</td>
+</tr>
+<tr>
+<td>0x1f6</td>
+<td>0x176</td>
+<td>device</td>
+<td>device</td>
+</tr>
+<tr>
+<td>0x1f7</td>
+<td>0x177</td>
+<td>status</td>
+<td>command</td>
+</tr>
+<tr>
+<td>0x3f6</td>
+<td>0x376</td>
+<td>alternative status</td>
+<td>device control</td>
+</tr>
+</tbody></table>
+<h3 id="在哪里读写？"><a href="#在哪里读写？" class="headerlink" title="在哪里读写？"></a>在哪里读写？</h3><p>与我们平常使用的CHS方式（x道x面x扇区）不同，这里使用了LBA的方式定位硬盘上的扇区（准确的说是LBA28），使用了28位来表示扇区，总共可以表示2^28扇区，每个扇区512字节，总共128GB。我们可以看到端口中也有三个是LBA的，但是它们每个只有8位（除了data为16位，其他都是8位），一共才24位，剩下的4位在哪里找呢？放在device端口的低四位。</p>
+<h3 id="读写多少个扇区？"><a href="#读写多少个扇区？" class="headerlink" title="读写多少个扇区？"></a>读写多少个扇区？</h3><p>存放在sector count端口中。</p>
+<h3 id="读还是写？"><a href="#读还是写？" class="headerlink" title="读还是写？"></a>读还是写？</h3><p>写在command端口，格式如下：</p>
+<ol>
+<li>0xec: 硬盘识别</li>
+<li>0x20: 读扇区</li>
+<li>0x30: 写扇区</li>
+</ol>
+<p>device端口也需要指定一些信息</p>
+<table>
+<thead>
+<tr>
+<th>位</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>7</td>
+<td>1</td>
+</tr>
+<tr>
+<td>6</td>
+<td>MOD，寻址模式，1为LBA，0为CHS</td>
+</tr>
+<tr>
+<td>5</td>
+<td>1</td>
+</tr>
+<tr>
+<td>4</td>
+<td>DEV，主盘还是从盘，0为主盘</td>
+</tr>
+<tr>
+<td>3~0</td>
+<td>LBA地址最高4位</td>
+</tr>
+</tbody></table>
+<h3 id="什么时候开始读写？"><a href="#什么时候开始读写？" class="headerlink" title="什么时候开始读写？"></a>什么时候开始读写？</h3><p>硬盘的速度非常慢（相对于CPU来说），我们发出读写指令后，硬盘往往不能立刻准备好，所以我们需要得知硬盘的状态来决定何时开始读写。这通过status来实现（和command端口其实是同一个端口）</p>
+<table>
+<thead>
+<tr>
+<th>位</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>7</td>
+<td>BSY，硬盘忙</td>
+</tr>
+<tr>
+<td>6</td>
+<td>DRDY，硬盘已准备好，可以发送指令</td>
+</tr>
+<tr>
+<td>5</td>
+<td></td>
+</tr>
+<tr>
+<td>4</td>
+<td></td>
+</tr>
+<tr>
+<td>3</td>
+<td>DRQ，数据已经准备好</td>
+</tr>
+<tr>
+<td>2</td>
+<td></td>
+</tr>
+<tr>
+<td>1</td>
+<td></td>
+</tr>
+<tr>
+<td>0</td>
+<td>ERR，硬盘发生错误，错误信息在error端口中</td>
+</tr>
+</tbody></table>
+<p>这种不断读取硬盘状态来决定何时读写的方式被称为轮询（Polling）方式，还有诸如中断、DMA、IO处理机方式等，这里暂时先不讨论。</p>
+<h3 id="准备一个简单的Loader程序"><a href="#准备一个简单的Loader程序" class="headerlink" title="准备一个简单的Loader程序"></a>准备一个简单的Loader程序</h3><p>准备一个<a target="_blank" rel="noopener" href="https://github.com/NaviHX/elephant-os/blob/master/chapter1/src/loader.S">输出“LOADER”的程序</a>，放在硬盘镜像的2号扇区，它将会被加载到内存的0x900地址（地址你定，这里只是一个例子罢了）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">%include &quot;boot.inc&quot;</span><br><span class="line">section LOADER vstart=LOADER_BASE_ADDR</span><br><span class="line">    ; 输出&quot;LOADER&quot;</span><br><span class="line">    mov byte [gs: 0x00], &#x27;L&#x27;</span><br><span class="line">    mov byte [gs: 0x01], 0x0f</span><br><span class="line"></span><br><span class="line">    mov byte [gs: 0x02], &#x27;O&#x27;</span><br><span class="line">    mov byte [gs: 0x03], 0x0f</span><br><span class="line"></span><br><span class="line">    mov byte [gs: 0x04], &#x27;A&#x27;</span><br><span class="line">    mov byte [gs: 0x05], 0x0f</span><br><span class="line"></span><br><span class="line">    mov byte [gs: 0x06], &#x27;D&#x27;</span><br><span class="line">    mov byte [gs: 0x07], 0x0f</span><br><span class="line"></span><br><span class="line">    mov byte [gs: 0x08], &#x27;E&#x27;</span><br><span class="line">    mov byte [gs: 0x09], 0x0f</span><br><span class="line"></span><br><span class="line">    mov byte [gs: 0x0A], &#x27;R&#x27;</span><br><span class="line">    mov byte [gs: 0x0B], 0x0f</span><br><span class="line"></span><br><span class="line">    jmp $</span><br></pre></td></tr></table></figure>
+
+<p>这里使用了预编译指令<code>include</code>，将其他文件包含到这份源文件中。<a target="_blank" rel="noopener" href="https://github.com/NaviHX/elephant-os/blob/master/chapter1/include/boot.inc">boot.inc文件</a>的内容是</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">LOADER_BASE_ADDR equ 0x900  ; loader程序加载到内存的起始地址</span><br><span class="line">LOADER_START_SECTOR equ 0x2 ; loader程序在硬盘中的LBA扇区号</span><br></pre></td></tr></table></figure>
+
+<p>定义了两个宏。</p>
+<h3 id="让MBR用用硬盘"><a href="#让MBR用用硬盘" class="headerlink" title="让MBR用用硬盘"></a>让MBR用用硬盘</h3><p><a target="_blank" rel="noopener" href="https://github.com/NaviHX/elephant-os/blob/master/chapter1/src/mbr.S">再次改造一下MBR代码</a>，让它能够读入硬盘中的loader程序，然后将控制权交给loader。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br></pre></td><td class="code"><pre><span class="line">%include &quot;boot.inc&quot;</span><br><span class="line">section MBR vstart=0x7c00</span><br><span class="line">    ; 初始化段寄存器</span><br><span class="line">    mov ax, cs</span><br><span class="line">    mov ds, ax</span><br><span class="line">    mov es, ax</span><br><span class="line">    mov fs, ax</span><br><span class="line">    mov sp, 0x7c00</span><br><span class="line">    mov ax, 0xb800 ; 使用文本模式的显存，将gs作为显存的段寄存器</span><br><span class="line">    mov gs, ax</span><br><span class="line"></span><br><span class="line">    ; 上卷屏幕</span><br><span class="line">    mov ax, 0x600  ; ah: 中断功能号 al: 上卷行数, 0表示全部</span><br><span class="line">    mov bx, 0x700  ; bh: 上卷行属性</span><br><span class="line">    mov cx, 0x0    ; (cl, ch): 左上角坐标</span><br><span class="line">    mov dx, 0x184f ; (dl, dh): 右下角坐标</span><br><span class="line">    int 0x10</span><br><span class="line"></span><br><span class="line">    ; 获取光标位置</span><br><span class="line">    mov ah, 3 ; 中断功能号 </span><br><span class="line">    mov bh, 0 ; 页号</span><br><span class="line">    int 0x10</span><br><span class="line"></span><br><span class="line">    ; 输出&quot;MBR&quot;</span><br><span class="line">    mov byte [gs: 0x00], &#x27;M&#x27;</span><br><span class="line">    mov byte [gs: 0x01], 0xA4</span><br><span class="line"></span><br><span class="line">    mov byte [gs: 0x02], &#x27;B&#x27;</span><br><span class="line">    mov byte [gs: 0x03], 0xA4</span><br><span class="line"></span><br><span class="line">    mov byte [gs: 0x04], &#x27;R&#x27;</span><br><span class="line">    mov byte [gs: 0x05], 0xA4</span><br><span class="line"></span><br><span class="line">    mov eax, LOADER_START_SECTOR</span><br><span class="line">    mov bx, LOADER_BASE_ADDR</span><br><span class="line">    mov cx, 0x1</span><br><span class="line">    call read_disk</span><br><span class="line"></span><br><span class="line">    jmp LOADER_BASE_ADDR ; 将控制权交给loader</span><br><span class="line"></span><br><span class="line">read_disk:</span><br><span class="line">    ; eax: LBA扇区地址(从0开始)</span><br><span class="line">    ; bx : 写入的内存地址</span><br><span class="line">    ; cx : 扇区数</span><br><span class="line"></span><br><span class="line">    mov esi, eax</span><br><span class="line">    mov di, cx</span><br><span class="line"></span><br><span class="line">    ; 写入扇区数</span><br><span class="line">    mov dx, 0x1f2</span><br><span class="line">    mov al, cl</span><br><span class="line">    out dx, al</span><br><span class="line"></span><br><span class="line">    mov eax, esi</span><br><span class="line"></span><br><span class="line">    ; 写入LBA地址</span><br><span class="line">    mov dx, 0x1f3</span><br><span class="line">    out dx, al</span><br><span class="line"></span><br><span class="line">    mov dx, 0x1f4</span><br><span class="line">    shr eax, 8</span><br><span class="line">    out dx, al</span><br><span class="line"></span><br><span class="line">    mov dx, 0x1f5</span><br><span class="line">    shr eax, 8</span><br><span class="line">    out dx, al</span><br><span class="line"></span><br><span class="line">    mov dx, 0x1f6</span><br><span class="line">    shr eax, 8</span><br><span class="line">    and al, 0xf</span><br><span class="line">    or al,0xe0    ; 启用LBA,主盘</span><br><span class="line">    out dx, al</span><br><span class="line"></span><br><span class="line">    ; 写入读指令</span><br><span class="line">    mov dx, 0x1f7</span><br><span class="line">    mov al, 0x20</span><br><span class="line">    out dx, al</span><br><span class="line"></span><br><span class="line">    ; Polling查询硬盘状态</span><br><span class="line">    .not_ready:</span><br><span class="line">        nop          ; 空操作，等待一段时间</span><br><span class="line">        in al, dx    ; 读取硬盘状态</span><br><span class="line">        and al, 0x88 ; 获取硬盘状态码的第三位和第七位，第三位表示已准备好数据，第七位表示硬盘忙</span><br><span class="line">        cmp al, 0x08 ; 检查第三位</span><br><span class="line">        jnz .not_ready</span><br><span class="line"></span><br><span class="line">    ; 读取数据</span><br><span class="line">    mov ax, di  ; di中为备份的cx值，扇区数</span><br><span class="line">    mov dx, 256</span><br><span class="line">    mul dx</span><br><span class="line">    mov cx, ax  ; cx寄存器控制循环次数，每次读两个字节，共读出di*512字节，所以共需读出di*256次 </span><br><span class="line"></span><br><span class="line">    mov dx, 0x1f0</span><br><span class="line">    .read_data:</span><br><span class="line">        in ax, dx</span><br><span class="line">        mov [bx], ax</span><br><span class="line">        add bx, 2</span><br><span class="line">        loop .read_data</span><br><span class="line">        ret</span><br><span class="line"></span><br><span class="line">    times 510-($-$$) db 0    ; 以0x00填充整个扇区剩余的部分</span><br><span class="line">    db 0x55, 0xaa            ; 魔数, 表示这个扇区存储MBR主引导记录</span><br></pre></td></tr></table></figure>
+
+<h3 id="一些分析"><a href="#一些分析" class="headerlink" title="一些分析"></a>一些分析</h3><h4 id="宏"><a href="#宏" class="headerlink" title="宏"></a>宏</h4><p>nasm提供了equ宏，使用<code>宏名 equ 值</code>的方式定义一个宏，在预编译阶段会把宏展开。</p>
+<h4 id="call与ret"><a href="#call与ret" class="headerlink" title="call与ret"></a>call与ret</h4><p>call与ret提供了函数调用的方式。<code>call 地址</code>可以将当前的PC值压栈并跳转到新地址，<code>ret</code>将返回地址取出来然后跳转。call分为近调用<code>call</code>（直接给出同段的调用地址，ret只取一个字）和原调用<code>callf</code>（地址需要给出段超越前缀，retf取两个字），ret也应该成对使用，否则会取出错误的地址和导致堆栈失衡。</p>
+<h4 id="nop空操作"><a href="#nop空操作" class="headerlink" title="nop空操作"></a>nop空操作</h4><p>然后CPU执行一个空指令，相当于sleep，给硬盘更多的时间。</p>
+<h4 id="loop"><a href="#loop" class="headerlink" title="loop"></a>loop</h4><p>使用cx寄存器控制循环的次数，详见注释。</p>
+<h2 id="上手试试"><a href="#上手试试" class="headerlink" title="上手试试"></a>上手试试</h2><p>源码在这里<a target="_blank" rel="noopener" href="https://github.com/NaviHX/elephant-os/tree/master/chapter1">github</a> \ <a target="_blank" rel="noopener" href="https://gitee.com/navihx/elephant-os/tree/master/chapter1">gitee</a>，用Makefile <code>make</code>一下就能写好硬盘镜像，使用bochs读取就行了。下面是一些注意事项。</p>
+<h3 id="编译汇编源码"><a href="#编译汇编源码" class="headerlink" title="编译汇编源码"></a>编译汇编源码</h3><p>因为这里使用头文件，请在nasm指令添加<code>-I&lt;包含目录&gt;</code>指出应该在哪里寻找头文件。</p>
+<h3 id="写入指定扇区"><a href="#写入指定扇区" class="headerlink" title="写入指定扇区"></a>写入指定扇区</h3><p>在dd指令中加入参数<code>seek=&lt;num&gt;</code>指定跳到第几个块。</p>
 
       
 
@@ -204,11 +408,11 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Code</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">项目开发</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">暴力</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">操作系统</a>
         		</li>
       		
 		</ul>
@@ -227,18 +431,9 @@
   
 <nav id="article-nav">
   
-    <a href="/2021/07/21/p2001/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          P2001 硬币的面值
-        
-      </div>
-    </a>
   
-  
-    <a href="/2021/07/21/pdf%E6%96%87%E4%BB%B6%E4%BF%A1%E6%81%AF%E7%AD%9B%E9%80%89/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">pdf信息的提取</div>
+    <a href="/2021/07/21/OS0/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">从零开始编写操作系统内核 &lt;0x00&gt;</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -265,7 +460,7 @@
                 </span>
                 <span class="tooltip-content">
                     <div class="toc-article">
-                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%98%E7%9B%AE%E6%8F%8F%E8%BF%B0"><span class="toc-number">1.</span> <span class="toc-text">题目描述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BE%93%E5%85%A5"><span class="toc-number">2.</span> <span class="toc-text">输入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BE%93%E5%87%BA"><span class="toc-number">3.</span> <span class="toc-text">输出</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Hint"><span class="toc-number">4.</span> <span class="toc-text">Hint</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%9D%E8%B7%AF%E8%A7%A3%E6%9E%90"><span class="toc-number">5.</span> <span class="toc-text">思路解析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Solution"><span class="toc-number">6.</span> <span class="toc-text">Solution</span></a></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%93%8D%E4%BD%9C%E6%98%BE%E5%8D%A1"><span class="toc-number">1.</span> <span class="toc-text">操作显卡</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#IO%E6%8E%A5%E5%8F%A3"><span class="toc-number">1.1.</span> <span class="toc-text">IO接口</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%B4%E6%8E%A5%E5%92%8C%E6%98%BE%E5%8D%A1%E8%AF%B4%E8%AF%B4%E8%AF%9D"><span class="toc-number">1.2.</span> <span class="toc-text">直接和显卡说说话</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%93%8D%E4%BD%9C%E7%A1%AC%E7%9B%98"><span class="toc-number">2.</span> <span class="toc-text">操作硬盘</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9C%A8%E5%93%AA%E9%87%8C%E8%AF%BB%E5%86%99%EF%BC%9F"><span class="toc-number">2.1.</span> <span class="toc-text">在哪里读写？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%BB%E5%86%99%E5%A4%9A%E5%B0%91%E4%B8%AA%E6%89%87%E5%8C%BA%EF%BC%9F"><span class="toc-number">2.2.</span> <span class="toc-text">读写多少个扇区？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%BB%E8%BF%98%E6%98%AF%E5%86%99%EF%BC%9F"><span class="toc-number">2.3.</span> <span class="toc-text">读还是写？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E5%BC%80%E5%A7%8B%E8%AF%BB%E5%86%99%EF%BC%9F"><span class="toc-number">2.4.</span> <span class="toc-text">什么时候开始读写？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%87%86%E5%A4%87%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84Loader%E7%A8%8B%E5%BA%8F"><span class="toc-number">2.5.</span> <span class="toc-text">准备一个简单的Loader程序</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%A9MBR%E7%94%A8%E7%94%A8%E7%A1%AC%E7%9B%98"><span class="toc-number">2.6.</span> <span class="toc-text">让MBR用用硬盘</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E4%BA%9B%E5%88%86%E6%9E%90"><span class="toc-number">2.7.</span> <span class="toc-text">一些分析</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%8F"><span class="toc-number">2.7.1.</span> <span class="toc-text">宏</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#call%E4%B8%8Eret"><span class="toc-number">2.7.2.</span> <span class="toc-text">call与ret</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#nop%E7%A9%BA%E6%93%8D%E4%BD%9C"><span class="toc-number">2.7.3.</span> <span class="toc-text">nop空操作</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#loop"><span class="toc-number">2.7.4.</span> <span class="toc-text">loop</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8A%E6%89%8B%E8%AF%95%E8%AF%95"><span class="toc-number">3.</span> <span class="toc-text">上手试试</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%96%E8%AF%91%E6%B1%87%E7%BC%96%E6%BA%90%E7%A0%81"><span class="toc-number">3.1.</span> <span class="toc-text">编译汇编源码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%99%E5%85%A5%E6%8C%87%E5%AE%9A%E6%89%87%E5%8C%BA"><span class="toc-number">3.2.</span> <span class="toc-text">写入指定扇区</span></a></li></ol></li></ol>
                     </div>
                 </span>
             </div>
