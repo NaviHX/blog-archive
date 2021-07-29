@@ -6,14 +6,20 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>Tag: 项目开发 | Bebop号的冰箱</title>
+  <title>从零开始编写操作系统内核 &lt;0x02&gt; 一脚踏入保护模式 | Bebop号的冰箱</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Bebop号的冰箱">
-<meta property="og:url" content="http://yoursite.com/tags/%E9%A1%B9%E7%9B%AE%E5%BC%80%E5%8F%91/index.html">
+  <meta name="description" content="本节将会学习如何进入保护模式，了解全局描述符表的结构和作用，亲手实践构建GDT并进入保护模式。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从零开始编写操作系统内核 &lt;0x02&gt; 一脚踏入保护模式">
+<meta property="og:url" content="http://yoursite.com/2021/07/29/OS2/index.html">
 <meta property="og:site_name" content="Bebop号的冰箱">
+<meta property="og:description" content="本节将会学习如何进入保护模式，了解全局描述符表的结构和作用，亲手实践构建GDT并进入保护模式。">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-07-29T02:40:16.781Z">
+<meta property="article:modified_time" content="2021-07-29T02:40:16.781Z">
 <meta property="article:author" content="Navi">
+<meta property="article:tag" content="项目开发">
+<meta property="article:tag" content="操作系统">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="Bebop号的冰箱" type="application/atom+xml">
@@ -152,36 +158,150 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
+            <article id="post-OS2" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
   
+    <h1 class="article-title" itemprop="name">
+      从零开始编写操作系统内核 &lt;0x02&gt; 一脚踏入保护模式
+    </h1>
   
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2021" class="archive-year">2021</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/07/29/OS2/" class="archive-article-date">
+
+        
+        <a href="/2021/07/29/OS2/" class="archive-article-date">
   	<time datetime="2021-07-29T02:40:16.781Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-07-29</time>
 </a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/07/29/OS2/">从零开始编写操作系统内核 &lt;0x02&gt; 一脚踏入保护模式</a>
-    </h1>
-  
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>本节将会学习如何进入保护模式，了解全局描述符表的结构和作用，亲手实践构建GDT并进入保护模式。</p>
+<span id="more"></span>
 
-        <div class="article-info info-on-right">
-          
+<h2 id="什么是保护模式"><a href="#什么是保护模式" class="headerlink" title="什么是保护模式"></a>什么是保护模式</h2><p>保护模式强调的是“保护”，在Intel 80286 CPU上初次出现。其实，在拥有保护模式的CPU出现前，本来是没有保护模式与实模式之分的。为了了解保护模式出现的原因，我们必须知道实模式存在的缺点。</p>
+<ol>
+<li>用户程序与系统软件在同一特权级下。</li>
+<li>逻辑地址等于物理地址，不方便进行加载。</li>
+<li>用户程序可以随意修改段基址，这意味着甚至是操作系统的数据都可以被用户随意修改。</li>
+<li>访问超过64KB的地址必须修改段基址，十分麻烦。</li>
+<li>一次只能运行一个程序。</li>
+<li>最多使用1MB内存，完全不够用。</li>
+</ol>
+<p>为了解决这些问题，Intel在新推出的CPU中添加了保护模式。寄存器位数从16位变成了32位（然而现在已经进入64位时代了XD）。为了进行内存保护，在保护模式下，增加了存储段描述符的全局描述符表GDT，每一个表项带有端的基地址，界限，读写执行属性等等，访问内存必须基于<code>段选择子: 偏移地址</code>的方式，由CPU检查段的各项属性。需要注意的是，与实模式不同，虽然寻址方式看上去很像，但是段选择子并不需要右移四位后与偏移量相加，而是作为GDT的索引值，在表中寻找基地址再相加，基地址与偏移量都是32位，直接相加就是真正的访问地址。同时每一个段都能访问全部的4G内存。</p>
+<p>保护模式同时提供了寻址方式的扩展。在实模式下，每个寄存器都有固定的使命，基址寻址只能用bx，bp，变址寻址只能用si，di。在保护模式下情况就大大不同了，基址寻址，变址寻址可以使用所有的32位通用寄存器，还可以对变址寄存器乘以一个比例因子（1，2，4，8）。</p>
+<h2 id="段选择子"><a href="#段选择子" class="headerlink" title="段选择子"></a>段选择子</h2><p>在介绍GDT前，我决定先来讲讲段选择子的结构（因为它简单XD）</p>
+<p>段选择子的结构如下</p>
+<table>
+<thead>
+<tr>
+<th>位</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0-1</td>
+<td>RPL</td>
+</tr>
+<tr>
+<td>2</td>
+<td>TI</td>
+</tr>
+<tr>
+<td>3-15</td>
+<td>索引值</td>
+</tr>
+</tbody></table>
+<p>RPL: 请求特权级<br>TI: 为0表示在全局描述符表中索引，否则在局部描述符表中索引</p>
+<h2 id="全局描述符表"><a href="#全局描述符表" class="headerlink" title="全局描述符表"></a>全局描述符表</h2><p>全局描述符表GDT中保存了很多段描述符供选择子进行选择，每一个描述符的大小为8字节（64位）。其中，第0个段描述符是无法使用的，CPU会抛出异常。因为，如果程序员忘记初始化段寄存器，其值为0，正好索引到第0个段描述符，会对数据或者程序进行非法的访问与修改，安全起见，CPU禁止了这种使用第0个描述符的行为。</p>
+<p>GDT也是存在于内存中，为了提高访问的速度，采用了类似的cache的机制，访问一个描述符后，将起缓存于一个寄存器中，如果下次使用了同一个段描述符，就可以直接从寄存器中访问，而无需访问内存。为了使用到这个功能，必须使用<code>lgdt</code>指令加载GDT，它只有一个操作数，其低16位为GDT界限，16-47位为GDT起始地址。</p>
+<p>段选择子选出描述符后，根据描述符中给出的数据得到段的基地址。段描述符的结构为</p>
+<table>
+<thead>
+<tr>
+<th>位</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0-15</td>
+<td>段界限0-15位</td>
+</tr>
+<tr>
+<td>16-31</td>
+<td>段基地址0-15位</td>
+</tr>
+<tr>
+<td>32-39</td>
+<td>段基地址16-23位</td>
+</tr>
+<tr>
+<td>40-43</td>
+<td>TYPE，表示段的类型，我们只用到非系统端，对于代码段，四位分别为（X可执行，C一致性，R可读，A），对于数据段，四位分别为（X，E扩展方向，W可写，A），当E为0表示向上扩展，否则为向下扩展</td>
+</tr>
+<tr>
+<td>44</td>
+<td>S，0表示系统段</td>
+</tr>
+<tr>
+<td>45-46</td>
+<td>DPL，段的特权级</td>
+</tr>
+<tr>
+<td>47</td>
+<td>P，present，表示该段是否存在，一般由操作系统管理该位，如果不存在，需要进触发中断，将段从硬盘中换到内存中</td>
+</tr>
+<tr>
+<td>48-51</td>
+<td>段界限16-19</td>
+</tr>
+<tr>
+<td>52</td>
+<td>AVL，没有专门的用途</td>
+</tr>
+<tr>
+<td>53</td>
+<td>L，设置是否为64位代码段</td>
+</tr>
+<tr>
+<td>54</td>
+<td>D/B，对于代码段是D，1表示为32位，使用EIP，否则为16位；对于数据段是B，为1表示32位，使用esp</td>
+</tr>
+<tr>
+<td>55</td>
+<td>G，段界限粒度，为1表示粒度为4K，否则为1</td>
+</tr>
+<tr>
+<td>56-63</td>
+<td>段基址24-31</td>
+</tr>
+</tbody></table>
+<p>看完这张表，你一定很疑惑，为什么段基址和段界限不能放在连续的位上呢？这涉及到了兼容的问题。最早推出的带有保护模式的CPU，80286，它的位数仍然为16位，段描述符并没有那么多位。从这里就可以看出，80286其实只是一款用来试水的产品，但是仍然有部分土豪购买了这个CPU。为了兼容性的问题，Intel只能在原本的段描述符上做扩展，这才形成了现在这种奇形怪状的结构。</p>
+<h2 id="进入保护模式的步骤"><a href="#进入保护模式的步骤" class="headerlink" title="进入保护模式的步骤"></a>进入保护模式的步骤</h2><p>一般进入保护模式的步骤为</p>
+<ol>
+<li>加载GDT</li>
+<li>打开A20地址线</li>
+<li>CR0 PE位置1</li>
+</ol>
+<h3 id="A20地址线"><a href="#A20地址线" class="headerlink" title="A20地址线"></a>A20地址线</h3><p>为了兼容老的16位CPU，在实模式中，A20地址线并没有打开。回忆一下，在实模式中，共用到了20根地址线，我们能访问到的最高地址，<code>FFFF: FFFF</code>，需要回卷到低地址，这就是因为我们并没有打开A20地址线。打开后我们就能访问高端内存了。</p>
+<p>打开的方式就是将0x92端口第1位置1。</p>
+<h3 id="CR0-PE位"><a href="#CR0-PE位" class="headerlink" title="CR0 PE位"></a>CR0 PE位</h3><p>控制寄存器CRx系列，既可以用来访问CPU的运行状态，也可以用来控制CPU。这次我们用到的就是CR0的最低位，PE（protection enable），将其置一来打开保护模式。</p>
+<h2 id="上手试试"><a href="#上手试试" class="headerlink" title="上手试试"></a>上手试试</h2><p>本节用到的代码全部在<a target="_blank" rel="noopener" href="https://github.com/NaviHX/elephant-os/tree/master/chapter2">github</a> / <a target="_blank" rel="noopener" href="https://gitee.com/navihx/elephant-os/tree/master/chapter2">gitee</a>上，麻烦移步到代码仓库查看，这里就不再贴了。</p>
+<h3 id="一些需要注意的问题"><a href="#一些需要注意的问题" class="headerlink" title="一些需要注意的问题"></a>一些需要注意的问题</h3><h4 id="VIDEO高四字节值错误"><a href="#VIDEO高四字节值错误" class="headerlink" title="VIDEO高四字节值错误"></a>VIDEO高四字节值错误</h4><p>参考<a target="_blank" rel="noopener" href="https://gitee.com/navihx/elephant-os/blob/master/chapter2/include/boot.inc">boot.inc</a>中的注释</p>
+<p>原书中的代码出现了错误。并没有给出完整的段基地址。</p>
+<h4 id="刷新流水线"><a href="#刷新流水线" class="headerlink" title="刷新流水线"></a>刷新流水线</h4><p>在进入保护模式前，必须刷新流水线。如果不刷新，会执行部分在实模式下译码得到的指令，导致错误的结果。刷新同时更新了段寄存器的值，一举两得。</p>
+<h4 id="loader的大小"><a href="#loader的大小" class="headerlink" title="loader的大小"></a>loader的大小</h4><p>注意这里loader的大小已经超过一个扇区了。为了方便，这里直接将大小改为了四个扇区。</p>
+<h3 id="上手试试-1"><a href="#上手试试-1" class="headerlink" title="上手试试"></a>上手试试</h3><p>执行<code>Makefile</code>即可。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -197,103 +317,68 @@
 		</ul>
 	</div>
 
-          
+      
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/07/24/OS1/" class="archive-article-date">
-  	<time datetime="2021-07-24T01:32:01.768Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-07-24</time>
-</a>
+<nav id="article-nav">
+  
+  
+    <a href="/2021/07/24/OS1/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">从零开始编写操作系统内核 &lt;0x01&gt; 操作显卡、硬盘与加载Loader</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/07/24/OS1/">从零开始编写操作系统内核 &lt;0x01&gt; 操作显卡、硬盘与加载Loader</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">项目开发</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">操作系统</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F"><span class="toc-number">1.</span> <span class="toc-text">什么是保护模式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AE%B5%E9%80%89%E6%8B%A9%E5%AD%90"><span class="toc-number">2.</span> <span class="toc-text">段选择子</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%A8%E5%B1%80%E6%8F%8F%E8%BF%B0%E7%AC%A6%E8%A1%A8"><span class="toc-number">3.</span> <span class="toc-text">全局描述符表</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%9B%E5%85%A5%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%AD%A5%E9%AA%A4"><span class="toc-number">4.</span> <span class="toc-text">进入保护模式的步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#A20%E5%9C%B0%E5%9D%80%E7%BA%BF"><span class="toc-number">4.1.</span> <span class="toc-text">A20地址线</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CR0-PE%E4%BD%8D"><span class="toc-number">4.2.</span> <span class="toc-text">CR0 PE位</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8A%E6%89%8B%E8%AF%95%E8%AF%95"><span class="toc-number">5.</span> <span class="toc-text">上手试试</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E4%BA%9B%E9%9C%80%E8%A6%81%E6%B3%A8%E6%84%8F%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">5.1.</span> <span class="toc-text">一些需要注意的问题</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#VIDEO%E9%AB%98%E5%9B%9B%E5%AD%97%E8%8A%82%E5%80%BC%E9%94%99%E8%AF%AF"><span class="toc-number">5.1.1.</span> <span class="toc-text">VIDEO高四字节值错误</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%B7%E6%96%B0%E6%B5%81%E6%B0%B4%E7%BA%BF"><span class="toc-number">5.1.2.</span> <span class="toc-text">刷新流水线</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#loader%E7%9A%84%E5%A4%A7%E5%B0%8F"><span class="toc-number">5.1.3.</span> <span class="toc-text">loader的大小</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8A%E6%89%8B%E8%AF%95%E8%AF%95-1"><span class="toc-number">5.2.</span> <span class="toc-text">上手试试</span></a></li></ol></li></ol>
+                    </div>
+                </span>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
+        
+    </div>
+</aside>
+
+
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/07/21/OS0/" class="archive-article-date">
-  	<time datetime="2021-07-21T07:21:32.799Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-07-21</time>
-</a>
-        </div>
-    	 
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/07/21/OS0/">从零开始编写操作系统内核 &lt;0x00&gt;</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">项目开发</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">操作系统</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
   
 
-    
+  
+
+  
 
 
           </div>
@@ -316,9 +401,9 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
-		isTag: true,
+		isTag: false,
 		isCategory: false,
 		open_in_new: false,
 		toc_hide_index: true,
