@@ -6,19 +6,21 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>KMP算法 | Bebop号的冰箱</title>
+  <title>LeetCode 242： 简单NIM游戏 | Bebop号的冰箱</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="常规算法的不足假设i指针遍历源文本,j指针遍历模式串,每次失配时,i都必须回溯到i-j+1的位置,浪费了很多时间. 改进的思路是根据模式串的性质,得到一个nxt数组,其指示了在第i,j位失配时,第i位的文本接下来尝试去匹配模式串的第nxt[j]位,防止i回溯. 通俗地说,就是在i,j位失配时,i不移动,而将j移动到nxt[j]继续进行匹配.">
+  <meta name="description" content="题目描述题目292难度： 简单 你和你的朋友，两个人一起玩 Nim 游戏： 桌子上有一堆石头。你们轮流进行自己的回合，你作为先手。每一回合，轮到的人拿掉 1 - 3 块石头。拿掉最后一块石头的人就是获胜者。假设你们每一步都是最优解。请编写一个函数，来判断你是否可以在给定石头数量为 n 的情况下赢得游戏。如果可以赢，返回 true；否则，返回 false 。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="KMP算法">
-<meta property="og:url" content="http://yoursite.com/2021/07/21/KMP/index.html">
+<meta property="og:title" content="LeetCode 242： 简单NIM游戏">
+<meta property="og:url" content="http://yoursite.com/2021/09/18/lc242/index.html">
 <meta property="og:site_name" content="Bebop号的冰箱">
-<meta property="og:description" content="常规算法的不足假设i指针遍历源文本,j指针遍历模式串,每次失配时,i都必须回溯到i-j+1的位置,浪费了很多时间. 改进的思路是根据模式串的性质,得到一个nxt数组,其指示了在第i,j位失配时,第i位的文本接下来尝试去匹配模式串的第nxt[j]位,防止i回溯. 通俗地说,就是在i,j位失配时,i不移动,而将j移动到nxt[j]继续进行匹配.">
+<meta property="og:description" content="题目描述题目292难度： 简单 你和你的朋友，两个人一起玩 Nim 游戏： 桌子上有一堆石头。你们轮流进行自己的回合，你作为先手。每一回合，轮到的人拿掉 1 - 3 块石头。拿掉最后一块石头的人就是获胜者。假设你们每一步都是最优解。请编写一个函数，来判断你是否可以在给定石头数量为 n 的情况下赢得游戏。如果可以赢，返回 true；否则，返回 false 。">
 <meta property="og:locale" content="en_US">
-<meta property="article:published_time" content="2021-07-21T06:33:50.659Z">
-<meta property="article:modified_time" content="2020-10-07T08:08:44.000Z">
+<meta property="article:published_time" content="2021-09-18T10:19:59.270Z">
+<meta property="article:modified_time" content="2021-09-18T11:22:57.149Z">
 <meta property="article:author" content="Navi">
-<meta property="article:tag" content="学习笔记">
+<meta property="article:tag" content="Code">
+<meta property="article:tag" content="动态规划">
+<meta property="article:tag" content="数学">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="Bebop号的冰箱" type="application/atom+xml">
@@ -157,49 +159,45 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-KMP" class="article article-type-post " itemscope itemprop="blogPost">
+            <article id="post-lc242" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      KMP算法
+      LeetCode 242： 简单NIM游戏
     </h1>
   
 
         
-        <a href="/2021/07/21/KMP/" class="archive-article-date">
-  	<time datetime="2021-07-21T06:33:50.659Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-07-21</time>
+        <a href="/2021/09/18/lc242/" class="archive-article-date">
+  	<time datetime="2021-09-18T10:19:59.270Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-09-18</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="常规算法的不足"><a href="#常规算法的不足" class="headerlink" title="常规算法的不足"></a>常规算法的不足</h2><p>假设i指针遍历源文本,j指针遍历模式串,每次失配时,i都必须回溯到i-j+1的位置,浪费了很多时间.</p>
-<p>改进的思路是根据模式串的性质,得到一个nxt数组,其指示了在第i,j位失配时,第i位的文本接下来尝试去匹配模式串的第nxt[j]位,防止i回溯.</p>
-<p>通俗地说,就是在i,j位失配时,i不移动,而将j移动到nxt[j]继续进行匹配.</p>
+        <h2 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h2><p><a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/nim-game/">题目292</a><br>难度： 简单</p>
+<p>你和你的朋友，两个人一起玩 Nim 游戏：</p>
+<p>桌子上有一堆石头。<br>你们轮流进行自己的回合，你作为先手。<br>每一回合，轮到的人拿掉 1 - 3 块石头。<br>拿掉最后一块石头的人就是获胜者。<br>假设你们每一步都是最优解。请编写一个函数，来判断你是否可以在给定石头数量为 n 的情况下赢得游戏。如果可以赢，返回 true；否则，返回 false 。  </p>
 <span id="more"></span>
 
-<blockquote>
-<p>e.g<br>src: aaab<br>pat: aab<br>i=2,j=2时失配<br>将j移动到1继续匹配</p>
-</blockquote>
-<h2 id="KMP算法实现"><a href="#KMP算法实现" class="headerlink" title="KMP算法实现"></a>KMP算法实现</h2><p>假设我们已经获得了nxt数组,那么算法是十分容易实现的</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">find</span><span class="params">(<span class="keyword">char</span> s[], <span class="keyword">char</span> p[])</span> <span class="comment">// 找到p[]出现时的索引</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// j=-1时表示对于当前的第i位,j已经无法找到下一个移动的位置,此时i++,放弃匹配此位</span></span><br><span class="line">	<span class="keyword">int</span> i = <span class="number">0</span>, j = <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">int</span> slen = <span class="built_in">strlen</span>(s), plen = <span class="built_in">strlen</span>(p);</span><br><span class="line">	<span class="keyword">while</span> (i &lt; slen &amp;&amp; j &lt; plen)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">if</span> (s[i] == p[j] || j == <span class="number">-1</span>)</span><br><span class="line">			i++, j++;</span><br><span class="line">		<span class="keyword">else</span></span><br><span class="line">			j = nxt[j];</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> (j == plen)</span><br><span class="line">		<span class="keyword">return</span> i - j;</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Hint"><a href="#Hint" class="headerlink" title="Hint"></a>Hint</h2><p><code>1 &lt;= n &lt;= 2^31-1</code></p>
+<p>很容易知道如果n = 1，2，3时，只要你直接取走所有石头就可以必胜。如果n = 4，不管你拿走多少个，下一次对手始终能够将石头全部取走，是必败的。那么n = 5呢？</p>
+<h2 id="解决思路"><a href="#解决思路" class="headerlink" title="解决思路"></a>解决思路</h2><h3 id="brute-force"><a href="#brute-force" class="headerlink" title="brute force"></a>brute force</h3><p>直接搜索肯定超时，pass</p>
+<h3 id="动态规划"><a href="#动态规划" class="headerlink" title="动态规划"></a>动态规划</h3><p>我们假设dp[i] (i&gt;=1) 表示n=i时，先手是否必胜。根据Hint可以知道dp[j] (j = 1,2,3) 为true，dp[4]为false。考虑i=5，如果拿走1个，那么对手无论拿走多少个，都会让石头总数剩下1~3个，下一次必胜。同理，对于i=6，7，拿走2 / 3个，最后总数都是4，必胜。但是对于i=8，无论你取走多少个石头（假设是x个），只要对手取走（4-x）个，总数就会剩下4个，必败。</p>
+<p>我们可以发现，只要让你取走石头后，对方无论怎么取石头都能让总数落到必胜的总数范围的话，那么这个总数也是能够让你必胜的。所以我们可以写出下面的状态转移方程：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">dp[i] = (dp[i-1-1] &amp;&amp; dp[i-1-2] &amp;&amp; dp[i-1-3]) \ </span><br><span class="line">     || (dp[i-2-1] &amp;&amp; dp[i-2-2] &amp;&amp; dp[i-2-3]) \</span><br><span class="line">     || (dp[i-3-1] &amp;&amp; dp[i-3-2] &amp;&amp; dp[i-3-3])</span><br><span class="line"></span><br><span class="line">// 实际上，如果你取走石头后，如果对手必败，那么也就是你必胜。</span><br><span class="line">// 所以还可以这样写</span><br><span class="line"></span><br><span class="line">dp[i] = !dp[i-1] || !dp[i-2] || !dp[i-3]</span><br></pre></td></tr></table></figure>
 
-<h3 id="nxt数组的意义"><a href="#nxt数组的意义" class="headerlink" title="nxt数组的意义"></a>nxt数组的意义</h3><p>如果在失配时j只需要移动到nxt[j],说明pat中0~nxt[j]-1位的文本恰好与src中i位之前nxt[j]位相同.</p>
-<p>特别地,nxt[0]=-1 (第0位失配直接放弃此位)<br>对于j&gt;0,如果没有找到前后相同的字符串,nxt[j]=0</p>
-<blockquote>
-<p>e.g<br>pat: abcabc<br>nxt[5]=3<br>第5位前: ‘ab’ c ‘ab’<br>pat: aaab<br>nxt[3]=2<br>第3位前: ‘aa’ ‘aa’ (重叠了一个a)  </p>
-</blockquote>
-<h3 id="获取nxt数组"><a href="#获取nxt数组" class="headerlink" title="获取nxt数组"></a>获取nxt数组</h3><p>根据上面的说法,我们可以很快得到nxt的计算方法<br>将pat进行部分自我匹配</p>
-<p>利用两个指针i,k<br>采用递推的方式获得nxt</p>
-<p>考虑nxt[j+1]<br>如果nxt[j]=k,且pat[j]==p[k]<br>那么nxt[j+1]=k+1<br>否则让k=nxt[k],重新进行尝试</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">getnxt</span><span class="params">(<span class="keyword">char</span> p[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">int</span> len = <span class="built_in">strlen</span>(p), i = <span class="number">0</span>, k = <span class="number">-1</span>;</span><br><span class="line">	nxt[<span class="number">0</span>] = <span class="number">-1</span>;</span><br><span class="line">	<span class="keyword">while</span> (i &lt; len)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">if</span> (k == <span class="number">-1</span> || p[i] == p[k])</span><br><span class="line">			nxt[++i] = ++k;</span><br><span class="line">		<span class="keyword">else</span></span><br><span class="line">			k = nxt[k];</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样我们就得到了一个O(n)的算法，但是对于<code>1&lt;=n&lt;=2^31-1</code>的数据范围来说，还不够理想。</p>
+<h3 id="O-1"><a href="#O-1" class="headerlink" title="O(1)?"></a>O(1)?</h3><p>按照上面的规律尝试几次后，我们可以发现似乎n模4同余0时，就会必败（这个命题可以通过数学归纳法证明）</p>
+<p>假设命题成立，n=4i(i为正整数)时必败，证明n=4(i+1)时也会必败。当n=4i+1,4i+2,4i+3时，主要你取走1，2，3个，就可以使对手必败，但是当n=4i+4，无论你取走多少个（假设为x个），只要对手取走(4-x)个就可以使你必败，命题得证。</p>
+<p>所以最后的公式是</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dp[i]=i%4</span><br></pre></td></tr></table></figure>
 
-<h3 id="nxt压缩"><a href="#nxt压缩" class="headerlink" title="nxt压缩"></a>nxt压缩</h3><p>预处理nxt[j]后一位的匹配情况,如果相等则压缩</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">getnxt_compressed</span><span class="params">(<span class="keyword">char</span> p[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">int</span> len = <span class="built_in">strlen</span>(p), i = <span class="number">0</span>, k = <span class="number">-1</span>;</span><br><span class="line">	nxt[<span class="number">0</span>] = <span class="number">-1</span>;</span><br><span class="line">	<span class="keyword">while</span>(i&lt;len)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">if</span>(k==<span class="number">-1</span> || p[i]==p[k])</span><br><span class="line">			<span class="keyword">if</span>(p[++i]!=p[++k])</span><br><span class="line">				nxt[i] = k;</span><br><span class="line">			<span class="keyword">else</span></span><br><span class="line">				nxt[i] = nxt[k];</span><br><span class="line">		<span class="keyword">else</span></span><br><span class="line">			k = nxt[k];</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>复杂度O(1)</p>
 
       
 
@@ -213,7 +211,15 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">学习笔记</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Code</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">动态规划</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">数学</a>
         		</li>
       		
 		</ul>
@@ -232,18 +238,9 @@
   
 <nav id="article-nav">
   
-    <a href="/2021/07/21/NES1/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          NeSimulator Step&lt;0x01&gt; 高速公路
-        
-      </div>
-    </a>
   
-  
-    <a href="/2021/07/21/NES2/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">NeSimulator Step&lt;0x02&gt; 核心</div>
+    <a href="/2021/07/29/OS2/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">从零开始编写操作系统内核 &lt;0x02&gt; 一脚踏入保护模式</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -270,7 +267,7 @@
                 </span>
                 <span class="tooltip-content">
                     <div class="toc-article">
-                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%B8%E8%A7%84%E7%AE%97%E6%B3%95%E7%9A%84%E4%B8%8D%E8%B6%B3"><span class="toc-number">1.</span> <span class="toc-text">常规算法的不足</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#KMP%E7%AE%97%E6%B3%95%E5%AE%9E%E7%8E%B0"><span class="toc-number">2.</span> <span class="toc-text">KMP算法实现</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#nxt%E6%95%B0%E7%BB%84%E7%9A%84%E6%84%8F%E4%B9%89"><span class="toc-number">2.1.</span> <span class="toc-text">nxt数组的意义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%8E%B7%E5%8F%96nxt%E6%95%B0%E7%BB%84"><span class="toc-number">2.2.</span> <span class="toc-text">获取nxt数组</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#nxt%E5%8E%8B%E7%BC%A9"><span class="toc-number">2.3.</span> <span class="toc-text">nxt压缩</span></a></li></ol></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%98%E7%9B%AE%E6%8F%8F%E8%BF%B0"><span class="toc-number">1.</span> <span class="toc-text">题目描述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Hint"><span class="toc-number">2.</span> <span class="toc-text">Hint</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E6%80%9D%E8%B7%AF"><span class="toc-number">3.</span> <span class="toc-text">解决思路</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#brute-force"><span class="toc-number">3.1.</span> <span class="toc-text">brute force</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92"><span class="toc-number">3.2.</span> <span class="toc-text">动态规划</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#O-1"><span class="toc-number">3.3.</span> <span class="toc-text">O(1)?</span></a></li></ol></li></ol>
                     </div>
                 </span>
             </div>
